@@ -1,0 +1,41 @@
+# Ignore all class files
+*.class
+
+# Ignore all log files
+*.log
+
+# Ignore all temporary files
+*.tmp
+
+# Ignore all compiled Java binaries
+bin/
+
+# Ignore all build directories
+build/
+
+# Ignore Maven target directory
+target/
+
+# Ignore IDE specific files
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# Ignore Eclipse specific files
+*.classpath
+*.project
+*.settings/
+
+# Ignore NetBeans specific files
+nbproject/
+*.nb-gradle/
+
+# Ignore VS Code specific files
+.vscode/
+
+# Ignore MacOS specific files
+.DS_Store
+
+# Ignore Windows specific files
+Thumbs.db
