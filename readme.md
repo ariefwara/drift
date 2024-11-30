@@ -1,8 +1,6 @@
 Grask Framework  
 ================  
 
-Grask - Grasping Task Management in Parallel Systems  
-
 Grask is a lightweight and flexible framework designed for managing parallel and sequential workflows with a fluent and intuitive API. It enables efficient task execution by combining simplicity, speed, and reliability, making it ideal for building modern, high-performance systems.  
 
 Features  
