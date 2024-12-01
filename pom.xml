@@ -1,10 +1,85 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>id.levalapp.drift</groupId>
+  <groupId>id.levelapp</groupId>
   <artifactId>drift-framework</artifactId>
   <packaging>jar</packaging>
   <version>1.0.0</version>
-  <name>grask-framework</name>
-  <url>http://maven.apache.org</url>
+  <name>drift-framework</name>
+  <description>Drift is a lightweight and intuitive framework for orchestrating workflows with a focus on parallel and sequential task execution. Inspired by the precision and smooth transitions of car drifting, Drift offers a sleek API for building efficient, high-performance systems.</description>
+  <url>https://github.com/ariefwara/drift</url>  
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/ariefwara/drift</url>
+    <connection>scm:git:git://github.com/ariefwara/drift.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/ariefwara/drift.git</developerConnection>
+  </scm>
+  <developers>
+    <developer>
+      <id>ariefwara</id>
+      <name>Arief Warazuhudien</name>
+      <email>arief.wara@gmail.com</email>
+    </developer>
+  </developers>
+  <build>
+    <plugins>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.6.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <publishingServerId>central</publishingServerId>
+          </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.7</version>
+            <executions>
+                <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>sign</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.11.1</version>
+            <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.2.1</version>
+            <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  </build>
 </project>

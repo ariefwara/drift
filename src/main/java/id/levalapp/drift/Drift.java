@@ -2,61 +2,114 @@ package id.levalapp.drift;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * The Drift class provides a framework for executing tasks in parallel
+ * and allows chaining of operations with fallback and side effects.
+ */
 public class Drift {
-    private final List<Object> initialParams;
-    private final List<List<Function<List<Object>, Object>>> taskGroups = new ArrayList<>();
+    private final Map<String, Object> state;
+    private boolean isEnded = false;
+    private Object[] finalResult;
 
-    public Drift(Object... initialParams) {
-        this.initialParams = List.of(initialParams);
+    /**
+     * Constructs a new Drift instance with the specified initial state.
+     *
+     * @param initialState the initial state to be used by the tasks
+     */
+    public Drift(Map<String, Object> initialState) {
+        this.state = initialState;
     }
 
+    /**
+     * Adds a group of tasks to be executed in parallel. Each task operates
+     * on the same Drift instance and can modify its state or end the process.
+     *
+     * @param tasks the tasks to be executed in parallel
+     * @return the current Drift instance for method chaining
+     */
     @SafeVarargs
-    public final <R> Drift shift(MultiParamFunction<R>... tasks) {
-        // Convert tasks into functions that operate on `List<Object>`
-        List<Function<List<Object>, Object>> taskList = new ArrayList<>();
-        for (MultiParamFunction<R> task : tasks) {
-            taskList.add(inputs -> task.apply(inputs.toArray()));
-        }
-        taskGroups.add(taskList);
-        return this;
-    }
+    public final Drift shift(Function<Drift, Drift>... tasks) {
+        if (isEnded) return this; // Skip further processing if already ended
 
-    public <R> R swift(MultiParamFunction<R> finalTask) {
         ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-        List<Object> currentResults = new ArrayList<>(initialParams);
+        List<Future<Drift>> futures = new ArrayList<>();
 
         try {
-            for (List<Function<List<Object>, Object>> taskGroup : taskGroups) {
-                currentResults = executeTasks(executor, taskGroup, currentResults);
+            for (Function<Drift, Drift> task : tasks) {
+                futures.add(executor.submit(() -> task.apply(this)));
             }
-            return finalTask.apply(currentResults.toArray());
+
+            // Wait for all tasks to complete
+            for (Future<Drift> future : futures) {
+                future.get(); // Ensure all tasks execute
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Task execution failed", e);
         } finally {
             executor.shutdown();
         }
+
+        return this;
     }
 
-    private List<Object> executeTasks(ExecutorService executor, List<Function<List<Object>, Object>> tasks, List<Object> inputs) {
-        List<Future<Object>> futures = new ArrayList<>();
-        for (Function<List<Object>, Object> task : tasks) {
-            futures.add(executor.submit(() -> task.apply(inputs)));
+    /**
+     * Executes a fallback operation if no tasks have ended the process.
+     *
+     * @param fallback the fallback operation to execute if no task ends the process
+     * @return the current Drift instance for method chaining
+     */
+    public Drift grip(Function<Drift, Drift> fallback) {
+        if (!isEnded) {
+            fallback.apply(this);
         }
-
-        List<Object> results = new ArrayList<>();
-        for (Future<Object> future : futures) {
-            try {
-                results.add(future.get());
-            } catch (Exception e) {
-                throw new RuntimeException("Task execution failed", e);
-            }
-        }
-        return results;
+        return this;
     }
 
-    @FunctionalInterface
-    public interface MultiParamFunction<R> {
-        R apply(Object... params);
+    /**
+     * Ends the process with a specific result.
+     *
+     * @param result the result to end the process with, typically including a status code and message
+     * @return the current Drift instance
+     */
+    public Drift end(Object... result) {
+        if (!isEnded) {
+            isEnded = true;
+            finalResult = result;
+        }
+        return this;
+    }
+
+    /**
+     * Performs a trailing side effect asynchronously.
+     *
+     * @param asyncTask the asynchronous task to execute as a side effect
+     */
+    public void trail(Consumer<Drift> asyncTask) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> asyncTask.accept(this));
+        executor.shutdown();
+    }
+
+    /**
+     * Gets the final result of the process.
+     *
+     * @return the final result as an Object array, or a default result if no resolution was reached
+     */
+    public Object[] getFinalResult() {
+        return finalResult != null ? finalResult : new Object[] {500, "No Resolution"};
+    }
+
+    /**
+     * Gets the current state of the Drift instance.
+     *
+     * @return the current state as a Map
+     */
+    public Map<String, Object> getState() {
+        return state;
     }
 }

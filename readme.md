@@ -6,11 +6,12 @@
 
 ## Features  
 
-- **Dynamic Task Management**: Define tasks with varying parameters and types effortlessly.  
-- **Parallel Execution**: Execute tasks simultaneously for optimized performance.  
-- **Sequential Chaining**: Seamlessly connect the output of one step to the next.  
-- **Sleek API**: Utilize the intuitive `shift` and `swift` keywords for fluid task orchestration.  
-- **Java Virtual Threads**: Leverages cutting-edge concurrency features for scalability.  
+- **Dynamic Task Management**: Define workflows with flexible, stateful execution.  
+- **Parallel Execution**: Run tasks concurrently for optimized performance.  
+- **Sequential Chaining**: Seamlessly connect and manage task sequences.  
+- **Fallback Handling**: Use `grip` for default responses when no condition matches.  
+- **Java Virtual Threads**: Leverage modern concurrency features for scalability.  
+- **Intuitive API**: Use `shift` for task orchestration and `trail` for asynchronous side effects.  
 
 ---
 
@@ -20,8 +21,8 @@ Add the following dependency to your `pom.xml` to include Drift in your project:
 
 ```xml
 <dependency>  
-    <groupId>id.levalapp.drift</groupId>  
-    <artifactId>drift-framework</artifactId>  
+    <groupId>id.levalapp</groupId>  
+    <artifactId>drift</artifactId>  
     <version>1.0.0</version>  
 </dependency>
 ```
@@ -43,35 +44,35 @@ Here’s how to use **Drift** to orchestrate workflows:
 ```java
 import id.levalapp.drift.Drift;
 
-public class Example {
-    public static void main(String[] args) {
-        String finalResult = new Drift("Hello", 42, true, 3.14, 'A', "World")
-            .shift(
-                params -> {
-                    System.out.println("Task 1 received: " + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5]);
-                    return params[0] + "-" + params[1] + "-" + params[2];
-                },
-                params -> {
-                    System.out.println("Task 2 received: " + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5]);
-                    return params[5] + params[4].toString() + params[3].toString();
-                }
-            )
-            .shift(
-                params -> {
-                    System.out.println("Task 3 received: " + params[0] + ", " + params[1]);
-                    return params[0] + "_processed";
-                },
-                params -> {
-                    System.out.println("Task 4 received: " + params[0] + ", " + params[1]);
-                    return params[1].toString().length();
-                }
-            )
-            .swift(params -> {
-                System.out.println("Final Task received: " + params[0] + ", " + params[1]);
-                return "Final Output: " + params[0] + ", Length: " + params[1];
-            });
+import java.util.Map;
 
-        System.out.println("Final Result: " + finalResult);
+public class DriftExample {
+    public static void main(String[] args) {
+        boolean conditionA = false;
+        boolean conditionB = true;
+        boolean conditionC = false;
+        boolean conditionD = false;
+        boolean conditionE = false;
+
+        Drift drift = new Drift(Map.of("key", "value"));
+
+        drift.shift(
+            (proc) -> conditionA ? proc.end(200, "Condition A Met") : proc,
+            (proc) -> conditionB ? proc.end(200, "Condition B Met") : proc,
+            (proc) -> conditionC ? proc.end(200, "Condition C Met") : proc
+        ).shift(
+            (proc) -> conditionD ? proc.end(200, "Condition D Met") : proc,
+            (proc) -> conditionE ? proc.end(200, "Condition E Met") : proc
+        ).grip(
+            (proc) -> proc.end(200, "Default Response After All Batches")
+        ).trail(
+            (proc) -> {
+                System.out.println("Async: Performing cleanup or logging...");
+            }
+        );
+
+        Object[] finalResult = drift.getFinalResult();
+        System.out.println("Final Result: " + finalResult[1]);
     }
 }
 ```
@@ -81,28 +82,50 @@ public class Example {
 ### Workflow Breakdown  
 
 1. **Drift Initialization**:
-   - Start the workflow with dynamic input parameters: `"Hello"`, `42`, `true`, `3.14`, `'A'`, `"World"`.  
+   - Initialize `Drift` with an initial state as a `Map`:
+     ```java
+     new Drift(Map.of("key", "value"))
+     ```
 
 2. **Shift Tasks**:
-   - Use `shift` to define intermediate tasks.
-   - Each task receives inputs as an array and returns a result for the next step.  
+   - Use `shift` to define parallel tasks:
+     ```java
+     drift.shift(
+         (proc) -> conditionA ? proc.end(200, "Condition A Met") : proc
+     );
+     ```
 
-3. **Swift Finalization**:
-   - Conclude the workflow with `swift`, which processes all accumulated results to produce the final output.
+3. **Fallback with Grip**:
+   - Handle default outcomes when no tasks meet conditions:
+     ```java
+     drift.grip((proc) -> proc.end(200, "Default Response"));
+     ```
+
+4. **Asynchronous Side Effects**:
+   - Use `trail` for cleanup or logging:
+     ```java
+     drift.trail((proc) -> System.out.println("Async task executed."));
+     ```
+
+5. **Retrieve Results**:
+   - Access the final result:
+     ```java
+     Object[] finalResult = drift.getFinalResult();
+     ```
 
 ---
 
-## Output  
+## Example Output  
 
-For the above example, the output will be:
+For the above workflow with conditions:
+- `conditionB = true`
+- All others are `false`
+
+The output will be:
 
 ```
-Task 1 received: Hello, 42, true, 3.14, A, World
-Task 2 received: Hello, 42, true, 3.14, A, World
-Task 3 received: Hello-42-true, WorldA3.14
-Task 4 received: Hello-42-true, WorldA3.14
-Final Task received: Hello-42-true_processed, 11
-Final Result: Final Output: Hello-42-true_processed, Length: 11
+Async: Performing cleanup or logging...
+Final Result: Condition B Met
 ```
 
 ---
