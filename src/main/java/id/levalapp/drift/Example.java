@@ -19,7 +19,7 @@ public class Example {
                 },
                 (proc) -> {
                     System.out.println("Checking Condition B");
-                    return conditionB ? proc.end(200, "Condition B Met") : proc;
+                    return conditionB ? proc.end(200, "Condition B Met") : proc.pass(Map.of("123", "123"));
                 },
                 (proc) -> {
                     System.out.println("Checking Condition C");

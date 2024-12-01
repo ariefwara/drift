@@ -4,7 +4,7 @@
   <groupId>id.levelapp</groupId>
   <artifactId>drift-framework</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>drift-framework</name>
   <description>Drift is a lightweight and intuitive framework for orchestrating workflows with a focus on parallel and sequential task execution. Inspired by the precision and smooth transitions of car drifting, Drift offers a sleek API for building efficient, high-performance systems.</description>
   <url>https://github.com/ariefwara/drift</url>  

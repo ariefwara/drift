@@ -85,14 +85,28 @@ public class Drift {
     }
 
     /**
+     * Passes additional state information without ending the process.
+     *
+     * @param additionalState the additional state to be passed
+     * @return the current Drift instance
+     */
+    public Drift pass(Map<String, Object> additionalState) {
+        if (!isEnded) {
+            state.putAll(additionalState);
+        }
+        return this;
+    }
+
+    /**
      * Performs a trailing side effect asynchronously.
      *
      * @param asyncTask the asynchronous task to execute as a side effect
      */
-    public void trail(Consumer<Drift> asyncTask) {
+    public Drift trail(Consumer<Drift> asyncTask) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> asyncTask.accept(this));
         executor.shutdown();
+        return this;
     }
 
     /**
@@ -111,5 +125,32 @@ public class Drift {
      */
     public Map<String, Object> getState() {
         return state;
+    }
+
+    /**
+     * Gets the value associated with the specified key.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the value associated with the specified key, or null if the key does not exist
+     */
+    public Object get(String key) {
+        return state.get(key);
+    }
+
+    /**
+     * Gets the value associated with the specified key, cast to the specified class.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param clazz the class to cast the value to
+     * @param <T> the type of the class
+     * @return the value associated with the specified key cast to the specified class, or null if the key does not exist
+     * @throws ClassCastException if the value cannot be cast to the specified class
+     */
+    public <T> T get(String key, Class<T> clazz) {
+        Object value = state.get(key);
+        if (value != null) {
+            return clazz.cast(value);
+        }
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 # Drift Framework  
 
-**Drift** is a lightweight and intuitive framework for orchestrating workflows with a focus on **parallel** and **sequential task execution**. Inspired by the precision and smooth transitions of car drifting, Drift offers a sleek API for building efficient, high-performance systems.
+**Drift** is a lightweight, intuitive framework for orchestrating workflows with a focus on **parallel** and **sequential task execution**. Inspired by the precision and smooth transitions of car drifting, Drift offers a sleek API for building efficient, high-performance systems.
 
 ---
 
