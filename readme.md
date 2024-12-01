@@ -23,7 +23,7 @@ Add the following dependency to your `pom.xml` to include Drift in your project:
 <dependency>  
     <groupId>id.levalapp</groupId>  
     <artifactId>drift</artifactId>  
-    <version>1.0.0</version>  
+    <version>1.0.1</version>  
 </dependency>
 ```
 
